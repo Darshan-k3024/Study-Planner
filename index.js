@@ -3,6 +3,7 @@ const express = require("express")
 const path = require("path")
 const methodOverride = require('method-override')
 const Task = require("./models/task.js")
+const wrapAsync = require("./utilis/wrapasyncError.js") // wrapasyncError
 const app = express()
 const port = 4100;
 
@@ -25,12 +26,12 @@ async function main() {
 }
 
 //root route
-app.get("/tasks", async(req, res) => {
+app.get("/tasks", wrapAsync(async(req, res) => {
 
   const tasks = await Task.find();   
 
   res.render("index.ejs", { tasks })  
-})
+}))
 
 //new task route
 app.get("/tasks/new", (req, res) => {
@@ -38,7 +39,7 @@ app.get("/tasks/new", (req, res) => {
 })
 
 //create route
-app.post("/tasks",(req,res)=>{
+app.post("/tasks",wrapAsync(async(req,res)=>{
   let {title,subject,description,dueDate} = req.body
     const priority = req.body.priority ? req.body.priority.trim() : undefined;
     const status = req.body.status ? req.body.status.trim() : undefined;
@@ -51,7 +52,7 @@ app.post("/tasks",(req,res)=>{
     status:status,
   
   })
-  newTask.save()
+  await newTask.save()
                 .then(()=>{
                   console.log("chat was saved")
                 })
@@ -60,26 +61,26 @@ app.post("/tasks",(req,res)=>{
                 })
   console.log(newTask)
    res.redirect("/tasks")
-})
+}))
 
 
 
-app.get("/tasks/show/:id", async (req, res) => {
+app.get("/tasks/show/:id",wrapAsync( async (req, res) => {
 
   let {id}= req.params
   let Tasks = await Task.findById(id)
 
   res.render("show.ejs",{Tasks})
-});
+}))
 
 //to get edit route
-app.get("/tasks/:id/edit",async(req,res)=>{
+app.get("/tasks/:id/edit",wrapAsync(async(req,res)=>{
   let {id}= req.params
   let Tasks = await Task.findById(id)
      res.render("edit.ejs",{Tasks})
-})
+}))
 // to update route
-app.patch("/tasks/:id",async(req,res)=>{
+app.patch("/tasks/:id",wrapAsync(async(req,res)=>{
    let {id}= req.params
    let newDescription=req.body.description
    let newStatus=req.body.status
@@ -101,18 +102,20 @@ app.patch("/tasks/:id",async(req,res)=>{
 
 
 
-})
+}))
 //distroy route
 
-app.delete("/tasks/:id",async(req,res)=>{
+app.delete("/tasks/:id",wrapAsync(async(req,res)=>{
    let {id}= req.params
 
    let deleteTask = await Task.findByIdAndDelete(id)
    console.log(deleteTask)
    res.redirect("/tasks")
+}))
+//handle cutom error
+app.use((err,req,res,next)=>{
+ res.send("Something went wrong")
 })
-
-
 
 app.listen(port, (req, res) => {
   console.log(`server listen on ${port}`)
