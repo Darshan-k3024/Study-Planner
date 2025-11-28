@@ -10,6 +10,7 @@ const port = 4100;
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
+// app.use('/views/public', express.static(path.join(__dirname, 'views/public')));
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(methodOverride('_method'))
@@ -26,12 +27,12 @@ async function main() {
 }
 
 //root route
-app.get("/tasks", wrapAsync(async(req, res) => {
+app.get("/tasks", async(req, res) => {
 
   const tasks = await Task.find();   
 
   res.render("index.ejs", { tasks })  
-}))
+})
 
 //new task route
 app.get("/tasks/new", (req, res) => {
@@ -39,46 +40,41 @@ app.get("/tasks/new", (req, res) => {
 })
 
 //create route
-app.post("/tasks",wrapAsync(async(req,res)=>{
-  let {title,subject,description,dueDate} = req.body
-    const priority = req.body.priority ? req.body.priority.trim() : undefined;
-    const status = req.body.status ? req.body.status.trim() : undefined;
-  let newTask = new Task({
-    title:title,
-    subject:subject,
-    description:description,
-    dueDate:dueDate,
-    priority:priority,
-    status:status,
-  
-  })
-  await newTask.save()
-                .then(()=>{
-                  console.log("chat was saved")
-                })
-                .catch((err)=>{
-                  console.log(err)
-                })
-  console.log(newTask)
-   res.redirect("/tasks")
-}))
+app.post("/tasks", wrapAsync(async (req, res) => {
+  const { title, subject, description, dueDate, priority, status } = req.body;
+
+  const newTask = new Task({
+    title,
+    subject,
+    description,
+    dueDate,
+    priority: priority?.trim(),
+    status: status?.trim(),
+  });
+
+  await newTask.save();
+  console.log("Task was saved:", newTask);
+
+  res.redirect("/tasks");
+}));
 
 
 
-app.get("/tasks/show/:id",wrapAsync( async (req, res) => {
+
+app.get("/tasks/show/:id", async (req, res) => {
 
   let {id}= req.params
   let Tasks = await Task.findById(id)
 
   res.render("show.ejs",{Tasks})
-}))
+})
 
 //to get edit route
-app.get("/tasks/:id/edit",wrapAsync(async(req,res)=>{
+app.get("/tasks/:id/edit",async(req,res)=>{
   let {id}= req.params
   let Tasks = await Task.findById(id)
      res.render("edit.ejs",{Tasks})
-}))
+})
 // to update route
 app.patch("/tasks/:id",wrapAsync(async(req,res)=>{
    let {id}= req.params
@@ -105,13 +101,13 @@ app.patch("/tasks/:id",wrapAsync(async(req,res)=>{
 }))
 //distroy route
 
-app.delete("/tasks/:id",wrapAsync(async(req,res)=>{
+app.delete("/tasks/:id",async(req,res)=>{
    let {id}= req.params
 
    let deleteTask = await Task.findByIdAndDelete(id)
    console.log(deleteTask)
    res.redirect("/tasks")
-}))
+})
 //handle cutom error
 app.use((err,req,res,next)=>{
  res.send("Something went wrong")
