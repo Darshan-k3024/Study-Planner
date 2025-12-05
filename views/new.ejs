@@ -74,29 +74,38 @@
 
     <div class="card shadow-sm border-0">
       <div class="card-body">
-       <form action="/tasks" method="post">
+       <form action="/tasks" method="post" class="needs-validation" novalidate>
         <!-- Title -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Task Title</label>
-          <input type="text" class="form-control" placeholder="Enter task title" name="title">
+          <input type="text" class="form-control" placeholder="Enter task title" name="title" required>
+             <div class="valid-feedback">
+      Looks good!
+    </div>
         </div>
 
         <!-- Subject -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Subject</label>
-          <input type="text" class="form-control" placeholder="Enter subject" name="subject">
+          <input type="text" class="form-control" placeholder="Enter subject" name="subject" required>
+             <div class="valid-feedback">
+      Looks good!
+    </div>
         </div>
 
         <!-- Description -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Description</label>
-          <textarea class="form-control" rows="3" placeholder="Enter task description" name="description"></textarea>
+          <textarea class="form-control" rows="3" placeholder="Enter task description" name="description" required></textarea>
+           <div class="invalid-feedback">
+        please provide description.
+      </div>
         </div>
 
         <!-- Due Date -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Due Date</label>
-          <input type="date" class="form-control" name="dueDate">
+          <input type="datetime-local" class="form-control" name="dueDate">
         </div>
 
         <!-- Priority -->

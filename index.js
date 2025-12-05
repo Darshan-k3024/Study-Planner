@@ -3,7 +3,10 @@ const express = require("express")
 const path = require("path")
 const methodOverride = require('method-override')
 const Task = require("./models/task.js")
+const ExpressError = require("./utilis/ExpressError.js")
 const wrapAsync = require("./utilis/wrapasyncError.js") // wrapasyncError
+const {TaskSchema,UpdateSchema}= require("./schema.js")
+// const { error } = require("console")
 const app = express()
 const port = 4100;
 
@@ -25,6 +28,30 @@ main()
 async function main() {
   await mongoose.connect("mongodb://127.0.0.1:27017/study-planner");
 }
+//middleware for create route
+const validatetask =(req,res,next)=>{
+  let {error}=TaskSchema.validate(req.body)
+  
+  if(error){
+    throw new ExpressError(400,error)
+  }
+  else{
+    next()
+  }
+  
+}
+
+//middleware for update route
+const validateUpdate =(req,res,next)=>{
+  let {error}=UpdateSchema.validate(req.body);
+  if(error){
+    throw new ExpressError(400,error)
+  }
+  else{
+    next()
+  }
+
+}
 
 //root route
 app.get("/tasks", async(req, res) => {
@@ -34,13 +61,22 @@ app.get("/tasks", async(req, res) => {
   res.render("index.ejs", { tasks })  
 })
 
+
 //new task route
 app.get("/tasks/new", (req, res) => {
   res.render("new.ejs")
 })
 
 //create route
-app.post("/tasks", wrapAsync(async (req, res) => {
+app.post("/tasks",validatetask,
+   wrapAsync(async (req, res) => {
+    // let result =TaskSchema.validate(req.body)
+    // console.log(result)
+    // if (result.error) {
+    //   throw new ExpressError(400,result.error)
+      
+    // }
+    
   const { title, subject, description, dueDate, priority, status } = req.body;
 
   const newTask = new Task({
@@ -56,7 +92,8 @@ app.post("/tasks", wrapAsync(async (req, res) => {
   console.log("Task was saved:", newTask);
 
   res.redirect("/tasks");
-}));
+})
+);
 
 
 
@@ -76,23 +113,20 @@ app.get("/tasks/:id/edit",async(req,res)=>{
      res.render("edit.ejs",{Tasks})
 })
 // to update route
-app.patch("/tasks/:id",wrapAsync(async(req,res)=>{
-   let {id}= req.params
-   let newDescription=req.body.description
-   let newStatus=req.body.status
-
-   let updatedTask = await Task.findByIdAndUpdate(
+app.patch("/tasks/:id",validateUpdate,
+  wrapAsync(async(req,res)=>{
+   const {id}= req.params
+   const newDescription=req.body.description
+   const newStatus=req.body.status
+   const updatedTask = await Task.findByIdAndUpdate(
     id,
     { description:newDescription,
       status:newStatus,
     },
-  
-    
-    
     { runValidators: true, new: true },
    
 
-  );
+  )
   console.log(updatedTask)
   res.redirect("/tasks")
 
@@ -109,9 +143,21 @@ app.delete("/tasks/:id",async(req,res)=>{
    res.redirect("/tasks")
 })
 //handle cutom error
-app.use((err,req,res,next)=>{
- res.send("Something went wrong")
+// app.use((err,req,res,next)=>{
+  
+//  res.send("Please put correct value")
+// })
+
+//custom ExpressError here for incorrectedt path
+app.all("/{*path}",(req,res,next)=>{
+  next(new ExpressError(404,"Opps..Page Not Found!!"))
 })
+//middleware define for express error
+ app.use((err,req,res,next)=>{
+    let{status=400,message="something went bad"}=err;
+    res.status(status).render("error.ejs",{message})
+ })
+
 
 app.listen(port, (req, res) => {
   console.log(`server listen on ${port}`)
