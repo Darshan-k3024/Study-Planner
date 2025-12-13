@@ -1,12 +1,15 @@
-const mongoose = require("mongoose")
 const express = require("express")
+const mongoose = require("mongoose")
 const path = require("path")
 const methodOverride = require('method-override')
 const Task = require("./models/task.js")
+const Notes = require("./models/notes.js")
+const wrapAsync = require('./utilis/wrapAsyncError')
 const ExpressError = require("./utilis/ExpressError.js")
-const wrapAsync = require("./utilis/wrapasyncError.js") // wrapasyncError
-const {TaskSchema,UpdateSchema}= require("./schema.js")
-// const { error } = require("console")
+
+const taskRoutes = require("./routes/task.js");   // create this file
+const noteRoutes = require("./routes/notes.js"); 
+
 const app = express()
 const port = 4100;
 
@@ -17,8 +20,11 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(methodOverride('_method'))
+app.use("/tasks",taskRoutes)
+app.use("/tasks/:id/notes",noteRoutes)
 
 main()
+
 .then(() => {
   console.log("connection successful");
 })
@@ -28,125 +34,9 @@ main()
 async function main() {
   await mongoose.connect("mongodb://127.0.0.1:27017/study-planner");
 }
-//middleware for create route
-const validatetask =(req,res,next)=>{
-  let {error}=TaskSchema.validate(req.body)
-  
-  if(error){
-    throw new ExpressError(400,error)
-  }
-  else{
-    next()
-  }
-  
-}
-
-//middleware for update route
-const validateUpdate =(req,res,next)=>{
-  let {error}=UpdateSchema.validate(req.body);
-  if(error){
-    throw new ExpressError(400,error)
-  }
-  else{
-    next()
-  }
-
-}
-
-//root route
-app.get("/tasks", async(req, res) => {
-
-  const tasks = await Task.find();   
-
-  res.render("index.ejs", { tasks })  
-})
-
-
-//new task route
-app.get("/tasks/new", (req, res) => {
-  res.render("new.ejs")
-})
-
-//create route
-app.post("/tasks",validatetask,
-   wrapAsync(async (req, res) => {
-    // let result =TaskSchema.validate(req.body)
-    // console.log(result)
-    // if (result.error) {
-    //   throw new ExpressError(400,result.error)
-      
-    // }
-    
-  const { title, subject, description, dueDate, priority, status } = req.body;
-
-  const newTask = new Task({
-    title,
-    subject,
-    description,
-    dueDate,
-    priority: priority?.trim(),
-    status: status?.trim(),
-  });
-
-  await newTask.save();
-  console.log("Task was saved:", newTask);
-
-  res.redirect("/tasks");
-})
-);
 
 
 
-
-app.get("/tasks/show/:id", async (req, res) => {
-
-  let {id}= req.params
-  let Tasks = await Task.findById(id)
-
-  res.render("show.ejs",{Tasks})
-})
-
-//to get edit route
-app.get("/tasks/:id/edit",async(req,res)=>{
-  let {id}= req.params
-  let Tasks = await Task.findById(id)
-     res.render("edit.ejs",{Tasks})
-})
-// to update route
-app.patch("/tasks/:id",validateUpdate,
-  wrapAsync(async(req,res)=>{
-   const {id}= req.params
-   const newDescription=req.body.description
-   const newStatus=req.body.status
-   const updatedTask = await Task.findByIdAndUpdate(
-    id,
-    { description:newDescription,
-      status:newStatus,
-    },
-    { runValidators: true, new: true },
-   
-
-  )
-  console.log(updatedTask)
-  res.redirect("/tasks")
-
-
-
-}))
-//distroy route
-
-app.delete("/tasks/:id",async(req,res)=>{
-   let {id}= req.params
-
-   let deleteTask = await Task.findByIdAndDelete(id)
-   console.log(deleteTask)
-   res.redirect("/tasks")
-})
-//handle cutom error
-// app.use((err,req,res,next)=>{
-  
-//  res.send("Please put correct value")
-// })
 
 //custom ExpressError here for incorrectedt path
 app.all("/{*path}",(req,res,next)=>{
