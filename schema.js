@@ -17,3 +17,13 @@ module.exports.UpdateSchema=Joi.object({
         status:Joi.string().required(),
 
 })
+
+
+module.exports.NotesSchema = Joi.object({
+        taskId:Joi.string().required(),
+        text: Joi.string()
+    .trim()    
+    .min(1)     
+    .required(),
+     
+})
