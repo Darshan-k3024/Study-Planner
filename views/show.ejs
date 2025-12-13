@@ -50,12 +50,7 @@
                     <form action="/tasks/<%= Tasks._id %>?_method=DELETE" method="post">
                         
                         <button class="btn btn-danger btn-sm">Delete</button>
-                        <script>
-                            document.body.querySelector(".btn-danger").addEventListener("click",()=>{
-                              alert("Do you sure..?")
-                            })
-                        </script>
-                       
+                     
         
                   </form>
                 </div>
@@ -78,11 +73,63 @@
                 <div class="text-muted fw-semibold small">Status</div>
                 <div><%= Tasks.status %></div>
               </div>
+              
+              
+
             </div>
 
           </div>
         </div>
+        <hr> 
+        <div class="add-note-container">
+
+  <!-- ✅ Heading -->
+  <h2>Add Notes</h2>
+<form class="note-form" action="/tasks/<%= Tasks._id %>/notes" method="post">
+
+  <textarea 
+    name="text" 
+    placeholder="Write your note here..." 
+    required>
+  </textarea>
+
+  <!-- (optional) hidden field jar req.body.taskId use karaycha asel tar -->
+  <input type="hidden" name="taskId" value="<%= Tasks._id %>">
+  <br>
+
+  
+
+  <button type="submit" class="btn btn-sm btn-success">Add Note</button>
+
+</form>
+<hr>
+<div class="mt-4">
+  <h5 class="mb-3">Notes</h5>
+
+  <% for (let notes of Tasks.notes) { %>
+    <div class="card mb-2 shadow-sm">
+      <div class="card-body py-2">
+        <p class="mb-1">
+          <%= notes.text %>
+        </p>
+     
+        <small class="text-muted">
+        
+        </small>
       </div>
+      
+          <form action="/tasks/<%= Tasks._id %>/notes/<%= notes._id %>?_method=DELETE" method="post">
+        <button class="btn btn-sm btn-danger">delete</button>
+      </form>
+    </div>
+    
+    <% } %>
+  </div>
+  
+  
+  
+</div>
+
     </div>
   </main>
 
