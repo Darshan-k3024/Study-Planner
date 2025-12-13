@@ -5,7 +5,7 @@
 
 ## 🚀 Features
 
-✅ Add new study tasks
+✅ Add new study tasks with notes
 
 ✅ View all tasks
 
