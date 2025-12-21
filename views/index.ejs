@@ -10,17 +10,37 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="/css/styles.css" />
 
   <style>
     body {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
+      font-family: "Inter", sans-serif;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+    }
+
+    .task-card {
+      transition: all 0.25s ease;
+      border-radius: 14px;
+    }
+
+    .task-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .badge-status {
+      text-transform: capitalize;
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+
+    .empty-state {
+      border: 2px dashed #dee2e6;
+      border-radius: 16px;
     }
   </style>
 </head>
@@ -28,115 +48,119 @@
 <body class="bg-light d-flex flex-column min-vh-100">
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
     <div class="container">
-      <a class="navbar-brand fw-semibold" href="/tasks">
-        StudyTrack
-      </a>
+      <a class="navbar-brand fw-bold" href="/tasks">StudyTrack</a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="mainNavbar">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-
+        <ul class="navbar-nav ms-auto me-3">
           <li class="nav-item">
-            <a class="nav-link active" href="http://localhost:4100/tasks">All Tasks</a>
+            <a class="nav-link active" href="/tasks">All Tasks</a>
           </li>
-
           <li class="nav-item">
             <a class="nav-link" href="/tasks/new">Add Task</a>
           </li>
-
         </ul>
+
+        <% if (!currUser) { %>
+          <a href="/signup" class="btn btn-success btn-sm me-2">Sign Up</a>
+          <a href="/login" class="btn btn-dark btn-sm">Sign In</a>
+        <% } %>
+
+        <% if (currUser) { %>
+          <a href="/logout" class="btn btn-dark btn-sm">Logout</a>
+        <% } %>
       </div>
     </div>
   </nav>
 
-  <!-- Main content -->
-
-
-
-  <main class="container py-4 flex-grow-1">
+  <!-- Main Content -->
+  <main class="container py-5 flex-grow-1">
 
     <div class="text-center mb-4">
-      <h1 class="h4 fw-semibold">Your Tasks</h1>
-      <p class="text-muted small">Manage and organize your study tasks easily.</p>
+      <h1 class="fw-semibold">Your Study Tasks</h1>
+      <p class="text-muted">Stay focused and organized ✨</p>
     </div>
-    <% for(let Task of tasks ) { %>
 
-      <!-- Task Card Placeholder -->
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
+    <!-- Flash Message -->
+    <% if (successMsg && successMsg.length) { %>
+      <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        <%= successMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
 
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <h6 class="fw-semibold mb-0">
-                <%= Task.title %>
-              </h6>
-              <small class="text-muted">Subject: <%= Task.subject %></small>
+    <!-- Task List -->
+    <% if (tasks.length > 0) { %>
+      <% for (let Task of tasks) { %>
+
+        <div class="card task-card mb-3 border-0">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="fw-semibold mb-1"><%= Task.title %></h6>
+                <small class="text-muted">📘 <%= Task.subject %></small>
+              </div>
+
+              <span class="badge badge-status
+                <% if (Task.status === 'pending') { %> bg-warning text-dark
+                <% } else if (Task.status === 'in progress') { %> bg-info
+                <% } else { %> bg-success <% } %>">
+                <%= Task.status %>
+              </span>
             </div>
 
-            <span class="badge 
-    <% if (Task.status === 'pending') { %> bg-warning text-dark
-    <% } else if (Task.status === 'in progress') { %> bg-info
-    <% } else if (Task.status === 'completed') { %> bg-success
-    <% } %>">
-              <%= Task.status %>
-            </span>
+            <hr class="my-2" />
+
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-secondary">
+                Priority: <%= Task.priority %>
+              </span>
+
+              <small class="text-muted">
+                <% if (Task.dueDate) { %>
+                  ⏰ <%= Task.dueDate.toString().split(" ").slice(0,4).join(" ") %>
+                <% } else { %>
+                  No due date
+                <% } %>
+              </small>
+            </div>
+
+            <div class="text-end mt-3">
+              <a href="/tasks/show/<%= Task._id %>" class="btn btn-outline-secondary btn-sm">View</a>
+              <a href="/tasks/<%= Task._id %>/edit" class="btn btn-outline-primary btn-sm">Edit</a>
+            </div>
+
           </div>
-
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="badge bg-secondary">Priority: <%= Task.priority %> </span>
-
-            <small class="text-muted">
-              <% if (Task.dueDate) { %>
-                Due: <%= Task.dueDate.toString().split(" ")[4] %>
-      <%= Task.dueDate.toString().split(" ").slice(0,4).join(" -") %>
-                  <% } else { %>
-                    No due date
-                    <% } %>
-            </small>
-          </div>
-
-          <div class="text-end mt-3">
-            <a href="/tasks/show/<%= Task._id %>" class="btn btn-outline-secondary btn-sm">View</a>
-            <a href="/tasks/<%= Task._id %>/edit" class="btn btn-outline-primary btn-sm">Edit</a>
-          </div>
-
         </div>
-      </div>
+
       <% } %>
+    <% } else { %>
 
-        <!-- No Tasks Placeholder -->
-        <div class="card border-0 shadow-sm mt-4">
-          <div class="card-body text-center py-5">
-            <h2 class="h6 text-muted mb-3">No tasks available</h2>
-            <p class="text-muted small mb-3">
-              Add your first task to get started.
-            </p>
-            <a href="/tasks/new" class="btn btn-primary btn-sm">
-              + Add Task
-            </a>
-          </div>
-        </div>
+      <!-- Empty State -->
+      <div class="empty-state bg-white p-5 text-center">
+        <h5 class="text-muted mb-3">No tasks yet 😴</h5>
+        <p class="text-muted small">Start by adding your first study task</p>
+        <a href="/tasks/new" class="btn btn-primary btn-sm">+ Add Task</a>
+      </div>
+
+    <% } %>
 
   </main>
 
-
   <!-- Footer -->
-  <footer class="border-top bg-white py-3 mt-auto">
-    <div class="container small text-muted text-center">
-      &copy; <%= new Date().getFullYear() %> StudyTrack · Built with Node.js &amp; Express
+  <footer class="bg-white border-top py-3 mt-auto">
+    <div class="container text-center small text-muted">
+      &copy; <%= new Date().getFullYear() %> StudyTrack · Built with Node.js & Express
     </div>
   </footer>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/main.js"></script>
-
 </body>
 
 </html>
