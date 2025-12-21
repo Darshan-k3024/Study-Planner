@@ -5,6 +5,11 @@ const Notes = require('../models/notes')
 const wrapAsync = require('../utilis/wrapAsyncError')
 const ExpressError = require("../utilis/ExpressError.js")
 const {TaskSchema,UpdateSchema}= require("../schema.js")
+const{isloggedin}=require("../middleware/isloggedin.js")
+const cookieParser = require('cookie-parser')
+const session = require("express-session")
+const flash = require("connect-flash");
+
 
 //middleware for create route
 const validatetask =(req,res,next)=>{
@@ -38,7 +43,7 @@ router.get("/", async(req, res) => {
   res.render("index.ejs", { tasks })  
 })
 //new task route
-router.get("/new", (req, res) => {
+router.get("/new", isloggedin,(req, res) => {
   res.render("new.ejs")
 })
 //create route
@@ -64,12 +69,13 @@ router.post("/",validatetask,
 
   await newTask.save();
   console.log("Task was saved:", newTask);
+  req.flash("success","New task created .!")
 
   res.redirect("/tasks");
 })
 );
 //show route
-router.get("/show/:id", async (req, res) => {
+router.get("/show/:id",isloggedin, async (req, res) => {
 
   let {id}= req.params
   let Tasks = await Task.findById(id).populate("notes")
@@ -77,7 +83,7 @@ router.get("/show/:id", async (req, res) => {
   res.render("show.ejs",{Tasks})
 })
 //edit route
-router.get("/:id/edit",async(req,res)=>{
+router.get("/:id/edit",isloggedin,async(req,res)=>{
   let {id}= req.params
   let Tasks = await Task.findById(id)
      res.render("edit.ejs",{Tasks})
@@ -98,6 +104,7 @@ router.patch("/:id",validateUpdate,
 
   )
   console.log(updatedTask)
+  req.flash("success","Task update successfully..!")
   res.redirect("/tasks")
 
 
@@ -105,11 +112,12 @@ router.patch("/:id",validateUpdate,
 }))
 
 //distroy route
-router.delete("/:id",async(req,res)=>{
+router.delete("/:id",isloggedin,async(req,res)=>{
    let {id}= req.params
 
    let deleteTask = await Task.findByIdAndDelete(id)
    console.log(deleteTask)
+   req.flash("success","Task deleted successfully..!")
    res.redirect("/tasks")
 })
 
