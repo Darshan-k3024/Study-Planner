@@ -27,3 +27,9 @@ module.exports.NotesSchema = Joi.object({
     .required(),
      
 })
+
+module.exports.UserSchema=Joi.object({
+     username:Joi.string().required(),
+     email:Joi.string().required(),
+     
+})
