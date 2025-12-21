@@ -9,6 +9,8 @@
 
 ✅ View all tasks
 
+✅ signUp & login
+
 ✅ View individual task details
 
 ✅ Edit & update tasks
