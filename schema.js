@@ -31,5 +31,5 @@ module.exports.NotesSchema = Joi.object({
 module.exports.UserSchema=Joi.object({
      username:Joi.string().required(),
      email:Joi.string().required(),
-     
+     password:Joi.required(),
 })
