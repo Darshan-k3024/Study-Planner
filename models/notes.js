@@ -12,7 +12,10 @@ const notesSchema = new mongoose.Schema({
         required:true,
 
     },
-   
+   author:{
+    type:mongoose.Schema.ObjectId,
+    ref:"User",
+   },
 
 
 })
