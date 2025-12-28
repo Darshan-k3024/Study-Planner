@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const notes = require("./notes");
 const { TaskSchema } = require("../schema");
 const Notes = require("./notes");
+const User = require("./user.js")
 const taskSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -44,7 +45,11 @@ const taskSchema = new mongoose.Schema({
       type:mongoose.Schema.ObjectId,
       ref:"Notes"
     }
-  ]
+  ],
+  owener:{
+    type:mongoose.Schema.ObjectId,
+    ref:"User",
+  }
 });
 
 taskSchema.post("findOneAndDelete",async(task)=>{
