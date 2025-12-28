@@ -21,13 +21,16 @@ task.insertMany([
       description:"study for end sem exam",   // corrected spelling
       dueDate:new Date(),
       priority:"Medium",
+      owener:"6944f5742bab75c9e97427c2",
+      
     },
     {
       title:"OOPS-revision",
       subject:"OOP",
       description:"study for end sem exam",   // corrected spelling
       dueDate:new Date(),
-      priority:"Medium",
+      priority:"Medium" ,
+      owener:"6944f5742bab75c9e97427c2",
     },
 ])               
 .then((result)=>{ 
