@@ -133,7 +133,12 @@
 
             <div class="text-end mt-3">
               <a href="/tasks/show/<%= Task._id %>" class="btn btn-outline-secondary btn-sm">View</a>
-              <a href="/tasks/<%= Task._id %>/edit" class="btn btn-outline-primary btn-sm">Edit</a>
+              <!-- hide btn from another usres -->
+                  <% if (currUser && currUser._id.equals(Task.owener)) { %> 
+                       
+                        
+                        <a href="/tasks/<%= Task._id %>/edit" class="btn btn-outline-primary btn-sm">Edit</a>
+                       <% } %> 
             </div>
 
           </div>

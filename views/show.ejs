@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title><%= Tasks.title %> · StudyTrack</title>
+  <title>
+    <%= Tasks.title %> · StudyTrack
+  </title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -23,7 +26,7 @@
 
     .task-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
     }
 
     .badge {
@@ -67,129 +70,166 @@
     <% if (successMsg && successMsg.length) { %>
       <div class="alert alert-success alert-dismissible fade show">
         <%= successMsg %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
-    <% } %>
+      <% } %>
 
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
 
-        <!-- Task Card -->
-        <div class="card task-card border-0 mb-4">
-          <div class="card-body p-4">
+            <!-- Task Card -->
+            <div class="card task-card border-0 mb-4">
+              <div class="card-body p-4">
 
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <h1 class="h4 fw-semibold mb-1"><%= Tasks.title %></h1>
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <p>
+                      Created by
+                      <b><i>
+                          <%= Tasks.owener ? Tasks.owener.username : "Unknown" %>
+                        </i></b>
+                    </p>
+                    <h1 class="h4 fw-semibold mb-1">
+                      <%= Tasks.title %>
+                    </h1>
 
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                  <span class="badge bg-secondary"><%= Tasks.subject || "General" %></span>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                      <span class="badge bg-secondary">
+                        <%= Tasks.subject || "General" %>
+                      </span>
 
-                  <% let priorityClass =
-                      Tasks.priority === "High" ? "danger" :
-                      Tasks.priority === "Medium" ? "warning text-dark" :
-                      "success"; %>
+                      <% let priorityClass=Tasks.priority==="High" ? "danger" : Tasks.priority==="Medium"
+                        ? "warning text-dark" : "success" ; %>
 
-                  <span class="badge bg-<%= priorityClass %>">
-                    Priority: <%= Tasks.priority %>
-                  </span>
+                        <span class="badge bg-<%= priorityClass %>">
+                          Priority: <%= Tasks.priority %>
+                        </span>
 
-                  <% let statusClass =
-                      Tasks.status === "Completed" ? "success" :
-                      Tasks.status === "In Progress" ? "info" :
-                      "secondary"; %>
+                        <% let statusClass=Tasks.status==="Completed" ? "success" : Tasks.status==="In Progress"
+                          ? "info" : "secondary" ; %>
 
-                  <span class="badge rounded-pill bg-<%= statusClass %>">
-                    <%= Tasks.status %>
-                  </span>
+                          <span class="badge rounded-pill bg-<%= statusClass %>">
+                            <%= Tasks.status %>
+                          </span>
+                    </div>
+
+                    <small class="text-muted d-block mt-2">
+                      Task ID: <%= Tasks._id %>
+                    </small>
+                  </div>
+
+                  <div class="text-end">
+                    <a href="/tasks" class="btn btn-outline-secondary btn-sm mb-2">⬅ Back</a>
+
+                    <% if (currUser && Tasks.owener && currUser._id.equals(Tasks.owener._id)) { %>
+                    <form action="/tasks/<%= Tasks._id %>?_method=DELETE" method="post">
+                      <!-- //hide btns from another users -->
+                      
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        <% } %>
+                        
+                      
+                    </form>
+                  </div>
                 </div>
 
-                <small class="text-muted d-block mt-2">
-                  Task ID: <%= Tasks._id %>
-                </small>
-              </div>
+                <% if (Tasks.description) { %>
+                  <hr />
+                  <h6 class="text-uppercase text-muted">Description</h6>
+                  <p class="mb-0">
+                    <%= Tasks.description %>
+                  </p>
+                  <% } %>
 
-              <div class="text-end">
-                <a href="/tasks" class="btn btn-outline-secondary btn-sm mb-2">⬅ Back</a>
+                    <hr />
+                    <div class="row g-3 small">
+                      <div class="col-6 col-md-3">
+                        <div class="text-muted fw-semibold">Due Date</div>
+                        <div>
+                          <%= Tasks.dueDate ? Tasks.dueDate.toLocaleDateString("en-IN") : "-" %>
+                        </div>
+                      </div>
 
-                <form action="/tasks/<%= Tasks._id %>?_method=DELETE" method="post">
-                  <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
+                      <div class="col-6 col-md-3">
+                        <div class="text-muted fw-semibold">Status</div>
+                        <div>
+                          <%= Tasks.status %>
+                        </div>
+                      </div>
+                    </div>
+
               </div>
             </div>
 
-            <% if (Tasks.description) { %>
-              <hr />
-              <h6 class="text-uppercase text-muted">Description</h6>
-              <p class="mb-0"><%= Tasks.description %></p>
-            <% } %>
+            <!-- Notes Section -->
 
-            <hr />
-            <div class="row g-3 small">
-              <div class="col-6 col-md-3">
-                <div class="text-muted fw-semibold">Due Date</div>
-                <div>
-                  <%= Tasks.dueDate ? Tasks.dueDate.toLocaleDateString("en-IN") : "-" %>
-                </div>
-              </div>
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body p-4">
 
-              <div class="col-6 col-md-3">
-                <div class="text-muted fw-semibold">Status</div>
-                <div><%= Tasks.status %></div>
-              </div>
-            </div>
+                <h5 class="fw-semibold mb-3">📝 Add Note</h5>
 
-          </div>
-        </div>
+                <% if (currUser) { %>
 
-        <!-- Notes Section -->
-        <div class="card border-0 shadow-sm mb-4">
-          <div class="card-body p-4">
 
-            <h5 class="fw-semibold mb-3">📝 Add Note</h5>
+                  <form class="note-form" action="/tasks/<%= Tasks._id %>/notes" method="post">
+                    <textarea name="text" placeholder="Write your note here..." required></textarea>
+                    <input type="hidden" name="taskId" value="<%= Tasks._id %>">
 
-            <form class="note-form" action="/tasks/<%= Tasks._id %>/notes" method="post">
-              <textarea name="text" placeholder="Write your note here..." required></textarea>
-              <input type="hidden" name="taskId" value="<%= Tasks._id %>">
-
-              <div class="text-end mt-2">
-                <button type="submit" class="btn btn-success btn-sm">Add Note</button>
-              </div>
-            </form>
-
-          </div>
-        </div>
-
-        <!-- Notes List -->
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <h5 class="fw-semibold mb-3">📌 Notes</h5>
-
-            <% if (Tasks.notes.length === 0) { %>
-              <p class="text-muted small">No notes added yet.</p>
-            <% } %>
-
-            <% for (let notes of Tasks.notes) { %>
-              <div class="card note-card mb-2 position-relative">
-                <div class="card-body py-2">
-                  <p class="mb-0"><%= notes.text %></p>
-
-                  <form
-                    action="/tasks/<%= Tasks._id %>/notes/<%= notes._id %>?_method=DELETE"
-                    method="post"
-                    class="delete-btn"
-                  >
-                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    <div class="text-end mt-2">
+                      <button type="submit" class="btn btn-success btn-sm">Add Note</button>
+                    </div>
                   </form>
+
+              </div>
+            </div>
+            <% } %>
+
+
+              <!-- Notes List -->
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                  <h5 class="fw-semibold mb-3">📌 Notes</h5>
+
+                  <% if (Tasks.notes.length===0) { %>
+                    <p class="text-muted small">No notes added yet.</p>
+                    <% } %>
+
+                      <% for (let notes of Tasks.notes) { %>
+                        <div class="card note-card mb-2 position-relative">
+                          <div class="card-body py-2">
+                            <p class="mb-0">
+                            <b>Note created by</b> @<%= notes.author ? notes.author.username : "Anonymous" %>
+                            </p>
+                            <p class="mb-0">
+                              <%= notes.text %>
+                            </p>
+
+                            <form action="/tasks/<%= Tasks._id %>/notes/<%= notes._id %>?_method=DELETE" method="post"
+                              class="delete-btn">
+                              <button class="btn btn-sm btn-outline-danger delete-form" type="submit">Delete</button>
+                              <script>
+                                let btn = document.querySelectorAll(".delete-form")
+                                btn.forEach(form => {
+                                  form.addEventListener("submit", function (e) {
+                                    const confirmDelete = confirm("Are you sure you want to delete this note")
+                                  })
+                                  if (!confirmDelete) {
+                                    e.preventDefault()
+                                  }
+                                })
+
+
+                              </script>
+                            </form>
+                          </div>
+                        </div>
+                        <% } %>
+
                 </div>
               </div>
-            <% } %>
 
           </div>
         </div>
-
-      </div>
-    </div>
 
   </main>
 
@@ -199,4 +239,5 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
