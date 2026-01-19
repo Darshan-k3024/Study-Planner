@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router();
-const wrapAsync = require('../utilis/wrapAsyncError');
+const wrapAsync = require('./utils/wrapAsyncError.js');
 const User = require("../models/user.js")
 const passport = require("passport")
-const ExpressError = require("../utilis/ExpressError.js")
+const ExpressError = require("../utils/ExpressError.js")
 const { UserSchema } = require("../schema.js")
 //post-login middleware
 const { saveRedirectUrl } = require("../middleware/isloggedin.js")
