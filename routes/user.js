@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router();
-const wrapAsync = require('./utils/wrapAsyncError.js');
+const wrapAsync = require("../utils/wrapasyncError.js");
 const User = require("../models/user.js")
 const passport = require("passport")
 const ExpressError = require("../utils/ExpressError.js")
