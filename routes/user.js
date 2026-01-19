@@ -36,11 +36,15 @@ router.get("/login", (req, res) => {
 })
 
 //to login user
-router.post("/login",
-    //post-login middleware
-    saveRedirectUrl, 
-    passport.authenticate("local", { failureRedirect: "/login", failureFlash: true }),
-   userController.login )
+router.post(
+  "/login",
+  saveRedirectUrl,
+  passport.authenticate("local", {
+    failureFlash: true
+  }),
+  userController.login
+);
+
 
 //to logout user
 router.get("/logout", (req, res) => {

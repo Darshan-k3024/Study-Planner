@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express")
 const mongoose = require("mongoose")
 const path = require("path")
@@ -9,6 +11,8 @@ const wrapAsync = require("./utils/wrapasyncError.js")
 const ExpressError = require("./utils/ExpressError.js")
 const cookieParser = require('cookie-parser')
 const session = require("express-session")
+const MongoStore = require("connect-mongo")
+
 const flash = require("connect-flash");
 const passport=require("passport")
 const localStrategy =require("passport-local")
@@ -30,21 +34,31 @@ app.use(methodOverride('_method'))
 
 app.use(cookieParser("secretcode"))
 
+const dbStore = MongoStore.create({
+  mongoUrl: process.env.MONGO_URL,
+  secret: process.env.SESSION_SECRET,
+  touchAfter: 24 * 3600,
+});
+
+
+
+dbStore.on("error",()=>{
+  console.log("session store error",err)
+})
 app.use(
   session({
-    secret: "mysupersecretstring",
+    store: dbStore,
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie:{
-      // exipre user info when user stored a there info after than 7 days
-      expires:Date.now()+7*24*60*60+1000,
-      maxAge:7*24*60*60*1000,
-      httpOnly:true,
-        },
-  },
- 
-)
-)
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
+
 
 app.use(flash())
 app.use(passport.initialize())
@@ -65,7 +79,8 @@ app.use("/tasks",taskRoutes)
  app.use("/tasks/:id/notes",noteRoutes)
  app.use("/signup",userRoutes)
 app.use("/",userRoutes)
-          
+
+const dbUrl = process.env.MONGO_URL
  main()
 .then(() => {
   console.log("connection successful");
@@ -74,7 +89,7 @@ app.use("/",userRoutes)
   console.error("mongo connect error:", err);
 });
 async function main() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/study-planner");
+  await mongoose.connect(dbUrl);
 }
 
 

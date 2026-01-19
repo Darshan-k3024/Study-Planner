@@ -23,8 +23,9 @@ module.exports.signUp=async (req, res) => {
 module.exports.login=async (req, res) => {
         req.flash("success", "Welcome to Study-Planner")
         // here when usre are logout and try to add tasks  thenn after tpuch the add task and login then serve the add tasks fomr 
-        let redirectUrl = res.locals.redirectUrl || "/tasks"
-        res.redirect(redirectUrl)
+       const redirectUrl = res.locals.redirectUrl || "/tasks";
+  return res.redirect(redirectUrl); // ✔️ ONE response
 
 
     }
+
